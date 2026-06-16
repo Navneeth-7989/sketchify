@@ -6,6 +6,8 @@
     "./client": "./src/index.ts"
   },
   "scripts": {
+    "build": "prisma generate",
+    "postinstall": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
