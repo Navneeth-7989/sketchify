@@ -9,14 +9,22 @@ export type WorkspaceUser = {
   image?: string | null;
 };
 
-export function Topbar({ user }: { user: WorkspaceUser | null }) {
+export function Topbar({
+  user,
+  onShareClick,
+  sharing = false,
+}: {
+  user: WorkspaceUser | null;
+  onShareClick?: () => void;
+  sharing?: boolean;
+}) {
   const router = useRouter();
 
   return (
     <div className="pointer-events-none fixed right-4 top-4 z-[100] flex items-center gap-2">
       {user ? (
         <>
-          <ShareButton />
+          <ShareButton onClick={onShareClick} active={sharing} />
           <CollabButton />
           <ProfileMenu user={user} />
         </>
@@ -40,14 +48,25 @@ export function Topbar({ user }: { user: WorkspaceUser | null }) {
   );
 }
 
-function ShareButton() {
+function ShareButton({
+  onClick,
+  active,
+}: {
+  onClick?: () => void;
+  active?: boolean;
+}) {
   return (
     <button
-      className="pointer-events-auto flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/40 transition-all duration-200 hover:scale-[1.03] hover:from-violet-500 hover:to-indigo-500 hover:shadow-xl hover:shadow-indigo-500/50 active:scale-95"
+      onClick={onClick}
+      className={`pointer-events-auto flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.03] hover:shadow-xl active:scale-95 ${
+        active
+          ? "bg-gradient-to-r from-sky-500 to-teal-500 shadow-sky-500/50 ring-2 ring-sky-300/50"
+          : "bg-gradient-to-r from-violet-600 to-indigo-600 shadow-indigo-500/40 hover:from-violet-500 hover:to-indigo-500 hover:shadow-indigo-500/50"
+      }`}
       title="Share"
     >
       <ShareIcon />
-      Share
+      {active ? "Selecting…" : "Share"}
     </button>
   );
 }

@@ -1,15 +1,17 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "@excalidraw/excalidraw/index.css";
 import type {
   AppState,
   BinaryFiles,
+  ExcalidrawImperativeAPI,
   ExcalidrawInitialDataState,
 } from "@excalidraw/excalidraw/types";
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import { Topbar, type WorkspaceUser } from "./Topbar";
+import { ShareDialog } from "./ShareDialog";
 import { serializeScene, isSceneNonEmpty, type SceneData } from "@/lib/scene";
 import {
   loadLocalScene,
@@ -69,6 +71,35 @@ const DEFAULT_DATA: ExcalidrawInitialDataState = {
   appState: { theme: "dark" },
 };
 
+function pickSelectedScene(
+  elements: readonly ExcalidrawElement[],
+  appState: AppState,
+  files: BinaryFiles
+): SceneData | null {
+  const selectedIds = appState.selectedElementIds ?? {};
+  const idSet = new Set(
+    Object.keys(selectedIds).filter((id) => selectedIds[id])
+  );
+  if (idSet.size === 0) return null;
+
+  const elements_ = elements.filter((el) => {
+    if (el.isDeleted) return false;
+    if (idSet.has(el.id)) return true;
+    const containerId = (el as { containerId?: string | null }).containerId;
+    return containerId != null && idSet.has(containerId);
+  });
+  if (elements_.length === 0) return null;
+
+  return {
+    elements: elements_,
+    appState: {
+      viewBackgroundColor: appState.viewBackgroundColor,
+      theme: appState.theme,
+    },
+    files: files ?? {},
+  };
+}
+
 function toInitialData(scene: SceneData): ExcalidrawInitialDataState {
   return {
     elements: scene.elements,
@@ -107,10 +138,42 @@ async function resolveInitialData(
 export function Workspace({ user }: { user: WorkspaceUser | null }) {
   const isAuthenticated = !!user;
 
+  const [api, setApi] = useState<ExcalidrawImperativeAPI | null>(null);
+  const [selecting, setSelecting] = useState(false);
+  const [dialogScene, setDialogScene] = useState<SceneData | null>(null);
+
   const initialData = useMemo(
     () => resolveInitialData(isAuthenticated),
     [isAuthenticated]
   );
+
+  const startShare = useCallback(() => {
+    setDialogScene(null);
+    if (!api) {
+      setSelecting(true);
+      return;
+    }
+    const snap = pickSelectedScene(
+      api.getSceneElements(),
+      api.getAppState(),
+      api.getFiles()
+    );
+    if (snap) {
+      setSelecting(false);
+      setDialogScene(snap);
+    } else {
+      setSelecting(true);
+    }
+  }, [api]);
+
+  useEffect(() => {
+    if (!selecting) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelecting(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selecting]);
 
   const save = useMemo(
     () =>
@@ -132,6 +195,23 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
     [isAuthenticated]
   );
 
+  const handleChange = useCallback(
+    (
+      elements: readonly ExcalidrawElement[],
+      appState: AppState,
+      files: BinaryFiles
+    ) => {
+      save(elements, appState, files);
+      if (!selecting) return;
+      const snap = pickSelectedScene(elements, appState, files);
+      if (snap) {
+        setSelecting(false);
+        setDialogScene(snap);
+      }
+    },
+    [save, selecting]
+  );
+
   useEffect(() => {
     const flush = () => save.flush();
     const onVisibility = () => {
@@ -148,8 +228,61 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
 
   return (
     <div className="fixed inset-0 h-screen w-screen">
-      <Topbar user={user} />
-      <Excalidraw initialData={initialData} onChange={save} />
+      <Topbar user={user} onShareClick={startShare} sharing={selecting} />
+
+      {selecting && (
+        <div className="pointer-events-none fixed left-1/2 top-4 z-[150] -translate-x-1/2 animate-dialog-in">
+          <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-white/10 bg-gray-950/60 py-2 pl-4 pr-2 shadow-2xl shadow-black/60 ring-1 ring-inset ring-white/5 backdrop-blur-2xl">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-sky-500/15 text-sky-300">
+              <CursorIcon />
+            </span>
+            <span className="text-sm font-medium text-gray-100">
+              Select the elements you want to share
+            </span>
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-500" />
+            </span>
+            <button
+              onClick={() => setSelecting(false)}
+              className="ml-1 rounded-full px-2.5 py-1 text-xs font-medium text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      <Excalidraw
+        excalidrawAPI={setApi}
+        initialData={initialData}
+        onChange={handleChange}
+      />
+
+      {dialogScene && (
+        <ShareDialog
+          scene={dialogScene}
+          onClose={() => setDialogScene(null)}
+        />
+      )}
     </div>
+  );
+}
+
+function CursorIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" />
+      <path d="M13 13l6 6" />
+    </svg>
   );
 }
