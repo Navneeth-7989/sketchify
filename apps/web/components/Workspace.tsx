@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@excalidraw/excalidraw/index.css";
 import type {
   AppState,
@@ -147,6 +147,18 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
     [isAuthenticated]
   );
 
+  const readyRef = useRef(false);
+  useEffect(() => {
+    readyRef.current = false;
+    let cancelled = false;
+    initialData.then(() => {
+      if (!cancelled) readyRef.current = true;
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialData]);
+
   const startShare = useCallback(() => {
     setDialogScene(null);
     if (!api) {
@@ -202,7 +214,7 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
       appState: AppState,
       files: BinaryFiles
     ) => {
-      save(elements, appState, files);
+      if (readyRef.current) save(elements, appState, files);
       if (!selecting) return;
       const snap = pickSelectedScene(elements, appState, files);
       if (snap) {
