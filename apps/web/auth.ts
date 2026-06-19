@@ -6,7 +6,6 @@ import GitHub from "next-auth/providers/github";
 import bcrypt from "bcryptjs";
 import { prisma } from "db/client";
 
-// Custom errors so the login page can show specific messages
 class UserNotFoundError extends CredentialsSignin {
   code = "user_not_found";
 }
@@ -19,9 +18,9 @@ class UseOAuthError extends CredentialsSignin {
 
 const nextAuth = NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" }, // REQUIRED because you use Credentials
+  session: { strategy: "jwt" },
   pages: {
-    signIn: "/", // canvas is the landing page; modal handles UI
+    signIn: "/",
   },
   providers: [
     Google,
@@ -38,8 +37,8 @@ const nextAuth = NextAuth({
 
         const user = await prisma.user.findUnique({ where: { email } });
 
-        if (!user) throw new UserNotFoundError();        // "signup first"
-        if (!user.password) throw new UseOAuthError();   // OAuth-only user
+        if (!user) throw new UserNotFoundError();
+        if (!user.password) throw new UseOAuthError();
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) throw new InvalidPasswordError();
 
@@ -59,8 +58,6 @@ const nextAuth = NextAuth({
   },
 });
 
-// Explicit type annotations work around next-auth v5 beta TS2883
-// ("inferred type cannot be named") in monorepos.
 export const handlers: NextAuthResult["handlers"] = nextAuth.handlers;
 export const auth: NextAuthResult["auth"] = nextAuth.auth;
 export const signIn: NextAuthResult["signIn"] = nextAuth.signIn;
