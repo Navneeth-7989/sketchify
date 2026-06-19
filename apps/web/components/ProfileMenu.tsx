@@ -18,8 +18,6 @@ export function ProfileMenu({ user }: { user: WorkspaceUser }) {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  const initial = (user.name ?? user.email ?? "?").charAt(0).toUpperCase();
-
   return (
     <div ref={ref} className="pointer-events-auto relative">
       <button
@@ -28,19 +26,8 @@ export function ProfileMenu({ user }: { user: WorkspaceUser }) {
         title={user.name ?? user.email ?? "Account"}
       >
         <span className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-400 via-indigo-500 to-fuchsia-500 opacity-90 transition-opacity duration-200 group-hover:opacity-100" />
-        <span className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-gray-900 text-sm font-semibold text-white ring-1 ring-black/20">
-          {user.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={user.image}
-              alt={user.name ?? "Profile"}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <span className="bg-gradient-to-br from-violet-300 to-indigo-200 bg-clip-text text-transparent">
-              {initial}
-            </span>
-          )}
+        <span className="relative flex h-full w-full items-center justify-center rounded-full bg-gray-900 text-white ring-1 ring-black/20">
+          <PersonIcon size={20} />
         </span>
         <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-gray-900 bg-emerald-400" />
       </button>
@@ -53,17 +40,8 @@ export function ProfileMenu({ user }: { user: WorkspaceUser }) {
         }`}
       >
         <div className="flex items-center gap-3 rounded-xl px-3 py-2.5">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-sm font-semibold text-white ring-1 ring-white/10">
-            {user.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={user.image}
-                alt={user.name ?? "Profile"}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              initial
-            )}
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white ring-1 ring-white/10">
+            <PersonIcon size={18} />
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-white">
@@ -86,6 +64,24 @@ export function ProfileMenu({ user }: { user: WorkspaceUser }) {
         </button>
       </div>
     </div>
+  );
+}
+
+function PersonIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
   );
 }
 
