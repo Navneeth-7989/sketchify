@@ -31,6 +31,10 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-6px)" },
         },
+        "slide-up": {
+          "0%": { opacity: "0", transform: "translateY(24px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "overlay-in": "overlay-in 0.2s ease-out",
@@ -38,6 +42,7 @@ export default {
         rise: "rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both",
         shimmer: "shimmer 2.5s linear infinite",
         "float-slow": "float-slow 4s ease-in-out infinite",
+        "slide-up": "slide-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both",
       },
     },
   },
