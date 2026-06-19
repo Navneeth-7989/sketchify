@@ -85,7 +85,7 @@ export function ShareDialog({
           <CloseIcon />
         </button>
 
-        <div className="relative px-7 pb-7 pt-8">
+        <div className="relative px-5 pb-6 pt-8 sm:px-7 sm:pb-7">
           <div
             className="flex flex-col items-center text-center animate-rise"
             style={{ animationDelay: "40ms" }}

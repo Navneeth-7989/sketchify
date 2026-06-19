@@ -21,7 +21,7 @@ export function Topbar({
   const router = useRouter();
 
   return (
-    <div className="pointer-events-none fixed right-4 top-4 z-[100] flex items-center gap-2">
+    <div className="pointer-events-none fixed right-2 top-2 z-[100] flex items-center gap-1.5 sm:right-4 sm:top-4 sm:gap-2">
       {user ? (
         <>
           <ShareButton onClick={onShareClick} active={sharing} />
@@ -32,13 +32,13 @@ export function Topbar({
         <>
           <button
             onClick={() => router.push("/signin")}
-            className="pointer-events-auto rounded-xl border border-white/10 bg-gray-900/80 px-4 py-2 text-sm font-medium text-gray-100 shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-200 hover:scale-[1.03] hover:border-white/20 hover:bg-gray-800/90 hover:shadow-xl active:scale-95"
+            className="pointer-events-auto rounded-xl border border-white/10 bg-gray-900/80 px-3 py-2 text-sm font-medium text-gray-100 shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-200 hover:scale-[1.03] hover:border-white/20 hover:bg-gray-800/90 hover:shadow-xl active:scale-95 sm:px-4"
           >
             Sign in
           </button>
           <button
             onClick={() => router.push("/signup")}
-            className="pointer-events-auto rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/40 transition-all duration-200 hover:scale-[1.03] hover:from-violet-500 hover:to-indigo-500 hover:shadow-xl hover:shadow-indigo-500/50 active:scale-95"
+            className="pointer-events-auto rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/40 transition-all duration-200 hover:scale-[1.03] hover:from-violet-500 hover:to-indigo-500 hover:shadow-xl hover:shadow-indigo-500/50 active:scale-95 sm:px-4"
           >
             Sign up
           </button>
@@ -58,7 +58,7 @@ function ShareButton({
   return (
     <button
       onClick={onClick}
-      className={`pointer-events-auto flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.03] hover:shadow-xl active:scale-95 ${
+      className={`pointer-events-auto flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.03] hover:shadow-xl active:scale-95 sm:px-4 ${
         active
           ? "bg-gradient-to-r from-sky-500 to-teal-500 shadow-sky-500/50 ring-2 ring-sky-300/50"
           : "bg-gradient-to-r from-violet-600 to-indigo-600 shadow-indigo-500/40 hover:from-violet-500 hover:to-indigo-500 hover:shadow-indigo-500/50"
@@ -66,7 +66,7 @@ function ShareButton({
       title="Share"
     >
       <ShareIcon />
-      {active ? "Selecting…" : "Share"}
+      <span className="hidden sm:inline">{active ? "Selecting…" : "Share"}</span>
     </button>
   );
 }
@@ -74,11 +74,11 @@ function ShareButton({
 function CollabButton() {
   return (
     <button
-      className="pointer-events-auto flex items-center gap-1.5 rounded-xl border border-white/10 bg-gray-900/80 px-4 py-2 text-sm font-medium text-gray-100 shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-200 hover:scale-[1.03] hover:border-indigo-400/40 hover:bg-gray-800/90 hover:text-indigo-300 hover:shadow-xl active:scale-95"
+      className="pointer-events-auto flex items-center gap-1.5 rounded-xl border border-white/10 bg-gray-900/80 px-2.5 py-2 text-sm font-medium text-gray-100 shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-200 hover:scale-[1.03] hover:border-indigo-400/40 hover:bg-gray-800/90 hover:text-indigo-300 hover:shadow-xl active:scale-95 sm:px-4"
       title="Collaborate"
     >
       <CollabIcon />
-      Collab
+      <span className="hidden sm:inline">Collab</span>
     </button>
   );
 }

@@ -32,15 +32,16 @@ export function SharedCanvas({ scene }: { scene: SceneData }) {
 
   return (
     <div className="fixed inset-0 h-screen w-screen">
-      <div className="pointer-events-none fixed left-4 top-4 z-[100] flex items-center gap-2">
+      <div className="pointer-events-none fixed left-2 top-2 z-[100] flex items-center gap-1.5 sm:left-4 sm:top-4 sm:gap-2">
         <Link
           href="/"
-          className="pointer-events-auto flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/40 transition-all duration-200 hover:scale-[1.03] hover:from-violet-500 hover:to-indigo-500 active:scale-95"
+          className="pointer-events-auto flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/40 transition-all duration-200 hover:scale-[1.03] hover:from-violet-500 hover:to-indigo-500 active:scale-95 sm:px-3.5"
         >
           Sketchify
         </Link>
         <span className="pointer-events-auto rounded-xl border border-white/10 bg-gray-900/80 px-3 py-2 text-xs font-medium text-gray-300 shadow-lg shadow-black/20 backdrop-blur-md">
-          Shared view · read-only
+          <span className="sm:hidden">Read-only</span>
+          <span className="hidden sm:inline">Shared view · read-only</span>
         </span>
       </div>
       <Excalidraw

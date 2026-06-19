@@ -231,21 +231,24 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
       <Topbar user={user} onShareClick={startShare} sharing={selecting} />
 
       {selecting && (
-        <div className="pointer-events-none fixed left-1/2 top-4 z-[150] -translate-x-1/2 animate-dialog-in">
-          <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-white/10 bg-gray-950/60 py-2 pl-4 pr-2 shadow-2xl shadow-black/60 ring-1 ring-inset ring-white/5 backdrop-blur-2xl">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-sky-500/15 text-sky-300">
+        <div className="pointer-events-none fixed left-1/2 top-2 z-[150] w-[calc(100vw-1rem)] max-w-max -translate-x-1/2 animate-dialog-in sm:top-4">
+          <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/10 bg-gray-950/60 py-2 pl-3 pr-2 shadow-2xl shadow-black/60 ring-1 ring-inset ring-white/5 backdrop-blur-2xl sm:gap-3 sm:pl-4">
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-sky-500/15 text-sky-300">
               <CursorIcon />
             </span>
-            <span className="text-sm font-medium text-gray-100">
-              Select the elements you want to share
+            <span className="truncate text-xs font-medium text-gray-100 sm:text-sm">
+              <span className="sm:hidden">Select what to share</span>
+              <span className="hidden sm:inline">
+                Select the elements you want to share
+              </span>
             </span>
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex h-2 w-2 flex-shrink-0">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-500" />
             </span>
             <button
               onClick={() => setSelecting(false)}
-              className="ml-1 rounded-full px-2.5 py-1 text-xs font-medium text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+              className="ml-0.5 flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-medium text-gray-400 transition-colors hover:bg-white/10 hover:text-white sm:ml-1"
             >
               Cancel
             </button>
