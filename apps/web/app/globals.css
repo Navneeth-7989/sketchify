@@ -29,3 +29,7 @@ a {
     transform: translateY(0);
   }
 }
+
+.excalidraw .default-sidebar-trigger {
+  display: none !important;
+}
