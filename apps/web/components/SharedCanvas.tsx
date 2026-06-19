@@ -35,6 +35,8 @@ export function SharedCanvas({ scene }: { scene: SceneData }) {
       <div className="pointer-events-none fixed left-2 top-2 z-[100] flex items-center gap-1.5 sm:left-4 sm:top-4 sm:gap-2">
         <Link
           href="/"
+          target="_blank"
+          rel="noopener noreferrer"
           className="pointer-events-auto flex items-center gap-1.5 rounded-xl bg-gradient-to-br from-white to-gray-300 px-3 py-2 text-sm font-bold text-gray-900 shadow-lg shadow-black/40 transition-all duration-200 hover:scale-[1.03] active:scale-95 sm:px-3.5"
         >
           <span className="text-base leading-none">✏️</span>
@@ -70,6 +72,8 @@ export function SharedCanvas({ scene }: { scene: SceneData }) {
 
           <Link
             href="/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="group relative flex flex-shrink-0 items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-b from-white to-gray-200 px-4 py-2.5 text-sm font-bold text-gray-900 shadow-lg shadow-black/40 transition-all duration-200 hover:to-white hover:shadow-xl active:scale-95 sm:px-5"
           >
             <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-black/5 to-transparent transition-transform duration-700 group-hover:translate-x-full" />

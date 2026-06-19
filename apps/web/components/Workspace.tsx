@@ -153,6 +153,7 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
       setSelecting(true);
       return;
     }
+    api.setActiveTool({ type: "selection" });
     const snap = pickSelectedScene(
       api.getSceneElements(),
       api.getAppState(),
