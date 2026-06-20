@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthLayout } from "@/components/AuthLayout";
 import { OAuthButtons } from "@/components/OAuthButtons";
+import { getSafeCallbackUrl } from "@/lib/callbackUrl";
 
 export default function SigninPage() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function SigninPage() {
       setMsg("Incorrect password. Please try again.");
     else if (res?.code === "use_oauth")
       setMsg("This account uses Google/GitHub. Please sign in with those.");
-    else if (res?.ok) router.push("/");
+    else if (res?.ok) router.push(getSafeCallbackUrl());
     else if (res?.error) setMsg("Sign in failed. Please try again.");
   }
 

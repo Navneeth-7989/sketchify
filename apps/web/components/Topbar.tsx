@@ -13,10 +13,12 @@ export function Topbar({
   user,
   onShareClick,
   sharing = false,
+  onCollabClick,
 }: {
   user: WorkspaceUser | null;
   onShareClick?: () => void;
   sharing?: boolean;
+  onCollabClick?: () => void;
 }) {
   const router = useRouter();
 
@@ -25,7 +27,7 @@ export function Topbar({
       {user ? (
         <>
           <ShareButton onClick={onShareClick} active={sharing} />
-          <CollabButton />
+          <CollabButton onClick={onCollabClick} />
           <ProfileMenu user={user} />
         </>
       ) : (
@@ -71,9 +73,10 @@ function ShareButton({
   );
 }
 
-function CollabButton() {
+function CollabButton({ onClick }: { onClick?: () => void }) {
   return (
     <button
+      onClick={onClick}
       className="pointer-events-auto flex items-center gap-1.5 rounded-xl border border-white/10 bg-gray-900/80 px-2.5 py-2 text-sm font-medium text-gray-100 shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-200 hover:scale-[1.03] hover:border-indigo-400/40 hover:bg-gray-800/90 hover:text-indigo-300 hover:shadow-xl active:scale-95 sm:px-4"
       title="Collaborate"
     >

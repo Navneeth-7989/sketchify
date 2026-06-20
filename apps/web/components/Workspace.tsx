@@ -12,6 +12,7 @@ import type {
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import { Topbar, type WorkspaceUser } from "./Topbar";
 import { ShareDialog } from "./ShareDialog";
+import { CollabDialog } from "./CollabDialog";
 import { serializeScene, isSceneNonEmpty, type SceneData } from "@/lib/scene";
 import {
   loadLocalScene,
@@ -141,6 +142,7 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
   const [api, setApi] = useState<ExcalidrawImperativeAPI | null>(null);
   const [selecting, setSelecting] = useState(false);
   const [dialogScene, setDialogScene] = useState<SceneData | null>(null);
+  const [collabOpen, setCollabOpen] = useState(false);
 
   const initialData = useMemo(
     () => resolveInitialData(isAuthenticated),
@@ -241,7 +243,12 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
 
   return (
     <div className="fixed inset-0 h-screen w-screen">
-      <Topbar user={user} onShareClick={startShare} sharing={selecting} />
+      <Topbar
+        user={user}
+        onShareClick={startShare}
+        sharing={selecting}
+        onCollabClick={() => setCollabOpen(true)}
+      />
 
       {selecting && (
         <div className="pointer-events-none fixed left-1/2 top-2 z-[150] w-[calc(100vw-1rem)] max-w-max -translate-x-1/2 animate-dialog-in sm:top-4">
@@ -281,6 +288,8 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
           onClose={() => setDialogScene(null)}
         />
       )}
+
+      {collabOpen && <CollabDialog onClose={() => setCollabOpen(false)} />}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { GoogleIcon, GitHubIcon } from "./ProviderIcons";
+import { getSafeCallbackUrl } from "@/lib/callbackUrl";
 
 export function OAuthButtons() {
   return (
@@ -13,14 +14,14 @@ export function OAuthButtons() {
 
       <div className="flex flex-col gap-2.5">
         <button
-          onClick={() => signIn("google", { callbackUrl: "/" })}
+          onClick={() => signIn("google", { callbackUrl: getSafeCallbackUrl() })}
           className="group flex items-center justify-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.03] py-2.5 text-sm font-medium text-gray-200 shadow-sm transition-all duration-200 hover:border-white/25 hover:bg-white/[0.07] hover:shadow-lg hover:shadow-black/40 active:scale-[0.98]"
         >
           <GoogleIcon />
           Continue with Google
         </button>
         <button
-          onClick={() => signIn("github", { callbackUrl: "/" })}
+          onClick={() => signIn("github", { callbackUrl: getSafeCallbackUrl() })}
           className="group flex items-center justify-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.03] py-2.5 text-sm font-medium text-gray-200 shadow-sm transition-all duration-200 hover:border-white/25 hover:bg-white/[0.07] hover:shadow-lg hover:shadow-black/40 active:scale-[0.98]"
         >
           <GitHubIcon />

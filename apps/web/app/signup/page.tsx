@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthLayout } from "@/components/AuthLayout";
 import { OAuthButtons } from "@/components/OAuthButtons";
+import { getSafeCallbackUrl } from "@/lib/callbackUrl";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function SignupPage() {
     });
     setLoading(false);
 
-    if (login?.ok) router.push("/");
+    if (login?.ok) router.push(getSafeCallbackUrl());
     else setMsg("Account created, but auto-login failed. Try signing in.");
   }
 
