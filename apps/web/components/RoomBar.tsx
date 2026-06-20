@@ -103,8 +103,9 @@ export function RoomBar({
   }
 
   return (
-    <div className="pointer-events-none fixed left-1/2 top-2 z-[150] flex w-[calc(100vw-1rem)] max-w-3xl -translate-x-1/2 items-start justify-between gap-2 sm:top-4">
-      <div className="pointer-events-auto relative">
+    <>
+      <div className="pointer-events-none fixed left-16 top-3 z-[150] sm:left-20">
+        <div className="pointer-events-auto relative">
         <button
           onClick={() => setPanelOpen((v) => !v)}
           className="flex items-center gap-2 rounded-2xl border border-white/10 bg-gray-950/70 px-2.5 py-1.5 shadow-2xl shadow-black/60 ring-1 ring-inset ring-white/5 backdrop-blur-2xl transition-colors hover:bg-gray-900/80"
@@ -119,10 +120,10 @@ export function RoomBar({
               </>
             )}
           </span>
-          <span className="text-xs font-medium text-gray-200">
+          <span className="hidden text-xs font-medium text-gray-200 sm:inline">
             {connecting ? "Connecting…" : "Live"}
           </span>
-          <span className="mx-0.5 h-4 w-px bg-white/10" />
+          <span className="mx-0.5 hidden h-4 w-px bg-white/10 sm:inline-block" />
           <div className="flex -space-x-2">
             {participants.slice(0, 5).map((p) => (
               <span
@@ -220,9 +221,11 @@ export function RoomBar({
             )}
           </div>
         )}
+        </div>
       </div>
 
-      <div className="pointer-events-auto flex items-center gap-1.5">
+      <div className="pointer-events-none fixed right-3 top-3 z-[150] sm:right-4">
+        <div className="pointer-events-auto flex items-center gap-1.5">
         {you && !canDraw && (
           <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1.5 text-xs font-medium text-amber-300">
             View only
@@ -260,8 +263,9 @@ export function RoomBar({
         >
           Leave
         </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
