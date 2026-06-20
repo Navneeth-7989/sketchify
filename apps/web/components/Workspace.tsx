@@ -151,6 +151,7 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
   );
 
   const readyRef = useRef(false);
+  const hasContentRef = useRef(false);
   const knownRevRef = useRef<string | null>(null);
   useEffect(() => {
     readyRef.current = false;
@@ -258,7 +259,12 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
             saveLocalScene(scene);
             return;
           }
-          if (scene.elements.length === 0) return;
+          // Allow saving an empty scene (e.g. the user deleted everything) so
+          // deletions persist — but only once we've actually observed content
+          // this session, to avoid a phantom empty onChange on initial load
+          // wiping the loaded DB scene.
+          if (scene.elements.length > 0) hasContentRef.current = true;
+          if (scene.elements.length === 0 && !hasContentRef.current) return;
           if (currentRev() !== knownRevRef.current) return;
           knownRevRef.current = bumpRev();
           void saveDbScene(scene);
