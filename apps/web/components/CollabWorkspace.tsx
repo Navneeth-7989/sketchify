@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@excalidraw/excalidraw/index.css";
-import { CaptureUpdateAction } from "@excalidraw/excalidraw";
 import type {
   AppState,
   BinaryFileData,
@@ -35,12 +34,17 @@ const SCENE_THROTTLE_MS = 80;
 const CURSOR_THROTTLE_MS = 50;
 const HOST_SAVE_DEBOUNCE_MS = 1200;
 
-function sceneSig(elements: readonly ExcalidrawElement[]): string {
+function sceneSig(
+  elements: readonly ExcalidrawElement[],
+  files: Record<string, unknown>
+): string {
   let s = "";
   for (const el of elements) {
     s += el.id + ":" + el.version + ";";
   }
-  return s;
+  const fileIds = Object.keys(files ?? {});
+  fileIds.sort();
+  return s + "|" + fileIds.join(",");
 }
 
 export function CollabWorkspace({
@@ -94,10 +98,10 @@ export function CollabWorkspace({
     (elements: unknown[], files: Record<string, unknown>) => {
       if (!api) return;
       const els = elements as unknown as ExcalidrawElement[];
-      lastSyncedSigRef.current = sceneSig(els);
+      lastSyncedSigRef.current = sceneSig(els, files);
       api.updateScene({
         elements: els,
-        captureUpdate: CaptureUpdateAction.NEVER,
+        captureUpdate: "NEVER",
       });
       const fileList = Object.values(files ?? {});
       if (fileList.length > 0) {
@@ -245,7 +249,7 @@ export function CollabWorkspace({
       if (!readyRef.current) return;
       if (!canDrawRef.current) return;
 
-      const sig = sceneSig(elements);
+      const sig = sceneSig(elements, files);
       if (sig === lastSyncedSigRef.current) return;
       lastSyncedSigRef.current = sig;
 

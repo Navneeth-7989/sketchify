@@ -6,6 +6,7 @@ import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { ClientMessage, PublicParticipant } from "@/lib/collabTypes";
 import type { SceneData } from "@/lib/scene";
 import { offsetAppendElements } from "@/lib/appendScene";
+import { bumpRev } from "@/lib/drawingRev";
 
 export function RoomBar({
   roomId,
@@ -80,6 +81,7 @@ export function RoomBar({
         return;
       }
 
+      bumpRev();
       try {
         sessionStorage.setItem("sketchify:fitOnLoad", "1");
       } catch {

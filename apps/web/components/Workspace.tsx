@@ -20,6 +20,7 @@ import {
   clearLocalScene,
 } from "@/lib/localScene";
 import { loadDbScene, saveDbScene } from "@/lib/dbScene";
+import { currentRev, bumpRev } from "@/lib/drawingRev";
 
 const Excalidraw = dynamic(
   () => import("@excalidraw/excalidraw").then((mod) => mod.Excalidraw),
@@ -150,11 +151,15 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
   );
 
   const readyRef = useRef(false);
+  const knownRevRef = useRef<string | null>(null);
   useEffect(() => {
     readyRef.current = false;
     let cancelled = false;
     initialData.then(() => {
-      if (!cancelled) readyRef.current = true;
+      if (!cancelled) {
+        knownRevRef.current = currentRev();
+        readyRef.current = true;
+      }
     });
     return () => {
       cancelled = true;
@@ -175,12 +180,41 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
     } catch {
       return;
     }
-    const timer = setTimeout(() => {
+    let tries = 0;
+    const interval = setInterval(() => {
+      tries += 1;
       const els = api.getSceneElements();
-      if (els.length > 0) api.scrollToContent(els, { fitToContent: true });
-    }, 300);
-    return () => clearTimeout(timer);
+      if (els.length > 0) {
+        api.scrollToContent(els, { fitToContent: true });
+        clearInterval(interval);
+      } else if (tries >= 50) {
+        clearInterval(interval);
+      }
+    }, 200);
+    return () => clearInterval(interval);
   }, [api]);
+
+  useEffect(() => {
+    if (!api || !isAuthenticated) return;
+    const resync = () => {
+      if (document.visibilityState !== "visible") return;
+      if (currentRev() === knownRevRef.current) return;
+      void loadDbScene().then((scene) => {
+        if (!scene) return;
+        api.updateScene({
+          elements: scene.elements as ExcalidrawElement[],
+          captureUpdate: "NEVER",
+        });
+        knownRevRef.current = currentRev();
+      });
+    };
+    document.addEventListener("visibilitychange", resync);
+    window.addEventListener("focus", resync);
+    return () => {
+      document.removeEventListener("visibilitychange", resync);
+      window.removeEventListener("focus", resync);
+    };
+  }, [api, isAuthenticated]);
 
   const startShare = useCallback(() => {
     setDialogScene(null);
@@ -220,11 +254,14 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
           files: BinaryFiles
         ) => {
           const scene = serializeScene(elements, appState, files);
-          if (isAuthenticated) {
-            void saveDbScene(scene);
-          } else {
+          if (!isAuthenticated) {
             saveLocalScene(scene);
+            return;
           }
+          if (scene.elements.length === 0) return;
+          if (currentRev() !== knownRevRef.current) return;
+          knownRevRef.current = bumpRev();
+          void saveDbScene(scene);
         },
         SAVE_DEBOUNCE_MS
       ),

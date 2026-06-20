@@ -28,15 +28,15 @@ export function offsetAppendElements(
   const existingAlive = existing.filter((el) => !el.isDeleted);
   const incomingAlive = incoming.filter((el) => !el.isDeleted);
 
-  const existingIds = new Set(existingAlive.map((el) => el.id));
-  const fresh = incomingAlive.filter((el) => !existingIds.has(el.id));
+  const incomingIds = new Set(incomingAlive.map((el) => el.id));
+  const own = existingAlive.filter((el) => !incomingIds.has(el.id));
 
-  const right = maxRightEdge(existingAlive);
-  const left = minLeftEdge(fresh);
+  const right = maxRightEdge(own);
+  const left = minLeftEdge(incomingAlive);
   const dx = right !== null && left !== null ? right + GAP - left : 0;
 
   const shifted =
-    dx === 0 ? fresh : fresh.map((el) => ({ ...el, x: el.x + dx }));
+    dx === 0 ? incomingAlive : incomingAlive.map((el) => ({ ...el, x: el.x + dx }));
 
-  return [...existingAlive, ...shifted];
+  return [...own, ...shifted];
 }
