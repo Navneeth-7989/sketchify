@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthLayout } from "@/components/AuthLayout";
 import { OAuthButtons } from "@/components/OAuthButtons";
+import { PasswordInput } from "@/components/PasswordInput";
 import { getSafeCallbackUrl } from "@/lib/callbackUrl";
 
 export default function SignupPage() {
@@ -76,9 +77,7 @@ export default function SignupPage() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <input
-          className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-white outline-none transition-all duration-200 placeholder:text-gray-500 focus:border-sky-400/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-sky-500/15"
-          type="password"
+        <PasswordInput
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
