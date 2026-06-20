@@ -10,6 +10,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "dotenv": "^17.4.2",
     "jsonwebtoken": "^9.0.2",
     "tsx": "^4.19.2",
     "ws": "^8.18.0"

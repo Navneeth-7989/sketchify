@@ -35,6 +35,14 @@ const SCENE_THROTTLE_MS = 80;
 const CURSOR_THROTTLE_MS = 50;
 const HOST_SAVE_DEBOUNCE_MS = 1200;
 
+function sceneSig(elements: readonly ExcalidrawElement[]): string {
+  let s = "";
+  for (const el of elements) {
+    s += el.id + ":" + el.version + ";";
+  }
+  return s;
+}
+
 export function CollabWorkspace({
   roomId,
   initialScene,
@@ -49,10 +57,11 @@ export function CollabWorkspace({
   const [canDraw, setCanDraw] = useState(true);
   const [participants, setParticipants] = useState<PublicParticipant[]>([]);
   const [you, setYou] = useState<PublicParticipant | null>(null);
+  const [hostLeft, setHostLeft] = useState(false);
 
   const wsRef = useRef<WebSocket | null>(null);
   const readyRef = useRef(false);
-  const applyingRemoteRef = useRef(false);
+  const lastSyncedSigRef = useRef("");
   const canDrawRef = useRef(true);
   const collaboratorsRef = useRef<Map<string, Collaborator>>(new Map());
 
@@ -81,39 +90,29 @@ export function CollabWorkspace({
     }
   }, []);
 
-  const withRemote = useCallback((fn: () => void) => {
-    applyingRemoteRef.current = true;
-    fn();
-    setTimeout(() => {
-      applyingRemoteRef.current = false;
-    }, 0);
-  }, []);
-
   const applyRemoteScene = useCallback(
     (elements: unknown[], files: Record<string, unknown>) => {
       if (!api) return;
-      withRemote(() => {
-        api.updateScene({
-          elements: elements as unknown as ExcalidrawElement[],
-          captureUpdate: CaptureUpdateAction.NEVER,
-        });
-        const fileList = Object.values(files ?? {});
-        if (fileList.length > 0) {
-          api.addFiles(fileList as unknown as BinaryFileData[]);
-        }
+      const els = elements as unknown as ExcalidrawElement[];
+      lastSyncedSigRef.current = sceneSig(els);
+      api.updateScene({
+        elements: els,
+        captureUpdate: CaptureUpdateAction.NEVER,
       });
+      const fileList = Object.values(files ?? {});
+      if (fileList.length > 0) {
+        api.addFiles(fileList as unknown as BinaryFileData[]);
+      }
     },
-    [api, withRemote]
+    [api]
   );
 
   const pushCollaborators = useCallback(() => {
     if (!api) return;
-    withRemote(() => {
-      api.updateScene({
-        collaborators: collaboratorsRef.current as Map<SocketId, Collaborator>,
-      });
+    api.updateScene({
+      collaborators: collaboratorsRef.current as Map<SocketId, Collaborator>,
     });
-  }, [api, withRemote]);
+  }, [api]);
 
   useEffect(() => {
     if (!api) return;
@@ -208,6 +207,10 @@ export function CollabWorkspace({
         setCanDraw(msg.canDraw);
         return;
       }
+      if (msg.type === "host-left") {
+        setHostLeft(true);
+        return;
+      }
       if (msg.type === "kicked") {
         setStatus("kicked");
         wsRef.current?.close();
@@ -239,8 +242,12 @@ export function CollabWorkspace({
       appState: AppState,
       files: BinaryFiles
     ) => {
-      if (!readyRef.current || applyingRemoteRef.current) return;
+      if (!readyRef.current) return;
       if (!canDrawRef.current) return;
+
+      const sig = sceneSig(elements);
+      if (sig === lastSyncedSigRef.current) return;
+      lastSyncedSigRef.current = sig;
 
       scenePendingRef.current = { elements, files };
       if (!sceneTimerRef.current) {
@@ -327,7 +334,47 @@ export function CollabWorkspace({
         isCollaborating
         viewModeEnabled={!canDraw}
       />
+
+      {hostLeft && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm animate-dialog-in rounded-2xl border border-white/10 bg-gray-950/95 p-6 text-center shadow-2xl shadow-black/60 ring-1 ring-inset ring-white/5">
+            <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-amber-500/15 text-amber-300">
+              <DoorIcon />
+            </span>
+            <h2 className="text-lg font-semibold text-white">The host left</h2>
+            <p className="mt-1 text-sm text-gray-400">
+              The room is still open. You can keep working together, or leave.
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => {
+                  window.location.assign("/");
+                }}
+                className="flex-1 rounded-xl border border-white/10 bg-gray-900/80 px-4 py-2.5 text-sm font-medium text-gray-200 transition-colors hover:bg-gray-800/90"
+              >
+                Leave room
+              </button>
+              <button
+                onClick={() => setHostLeft(false)}
+                className="flex-1 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/40 transition-all duration-200 hover:from-violet-500 hover:to-indigo-500 active:scale-95"
+              >
+                Stay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function DoorIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h7" />
+      <path d="M16 17l5-5-5-5" />
+      <path d="M21 12H9" />
+    </svg>
   );
 }
 

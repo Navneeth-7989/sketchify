@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { ClientMessage, PublicParticipant } from "@/lib/collabTypes";
@@ -25,11 +24,10 @@ export function RoomBar({
   api: ExcalidrawImperativeAPI | null;
   send: (message: ClientMessage) => void;
 }) {
-  const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saveState, setSaveState] = useState<"idle" | "saved" | "error">("idle");
 
   async function copyLink() {
     try {
@@ -44,9 +42,14 @@ export function RoomBar({
 
   async function saveToCanvas() {
     if (!api) return;
+    const roomElements = api.getSceneElements();
+    if (roomElements.length === 0) {
+      setSaveState("error");
+      setTimeout(() => setSaveState("idle"), 2600);
+      return;
+    }
     setSaving(true);
     try {
-      const roomElements = api.getSceneElements();
       const roomFiles = api.getFiles();
 
       let existing: SceneData = { elements: [], appState: {}, files: {} };
@@ -61,7 +64,7 @@ export function RoomBar({
         roomElements
       );
 
-      await fetch("/api/drawing", {
+      const put = await fetch("/api/drawing", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -70,10 +73,23 @@ export function RoomBar({
           files: { ...(existing.files ?? {}), ...roomFiles },
         }),
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2200);
+
+      if (!put.ok) {
+        setSaveState("error");
+        setTimeout(() => setSaveState("idle"), 2600);
+        return;
+      }
+
+      try {
+        sessionStorage.setItem("sketchify:fitOnLoad", "1");
+      } catch {
+        void 0;
+      }
+      setSaveState("saved");
+      setTimeout(() => setSaveState("idle"), 2200);
     } catch {
-      setSaved(false);
+      setSaveState("error");
+      setTimeout(() => setSaveState("idle"), 2600);
     } finally {
       setSaving(false);
     }
@@ -218,7 +234,13 @@ export function RoomBar({
         >
           <SaveIcon />
           <span className="hidden sm:inline">
-            {saving ? "Saving…" : saved ? "Saved!" : "Save"}
+            {saving
+              ? "Saving…"
+              : saveState === "saved"
+                ? "Saved!"
+                : saveState === "error"
+                  ? "Failed"
+                  : "Save"}
           </span>
         </button>
         <button
@@ -231,7 +253,7 @@ export function RoomBar({
           </span>
         </button>
         <button
-          onClick={() => router.push("/")}
+          onClick={() => window.location.assign("/")}
           className="rounded-xl border border-white/10 bg-gray-900/80 px-3 py-2 text-xs font-medium text-gray-200 shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-200 hover:border-white/20 hover:bg-gray-800/90 active:scale-95 sm:text-sm"
         >
           Leave

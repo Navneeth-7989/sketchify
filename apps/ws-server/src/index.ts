@@ -1,3 +1,4 @@
+import "dotenv/config";
 import http from "node:http";
 import { randomUUID } from "node:crypto";
 import { WebSocketServer, type WebSocket } from "ws";
@@ -61,6 +62,12 @@ function leave(conn: Conn | null): void {
   if (room.participants.size === 0) {
     removeRoom(room.id);
     return;
+  }
+  if (participant.isHost) {
+    const hostStillHere = [...room.participants.values()].some((p) => p.isHost);
+    if (!hostStillHere) {
+      broadcast(room, { type: "host-left" });
+    }
   }
   broadcastParticipants(room);
 }

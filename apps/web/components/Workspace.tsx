@@ -161,6 +161,27 @@ export function Workspace({ user }: { user: WorkspaceUser | null }) {
     };
   }, [initialData]);
 
+  useEffect(() => {
+    if (!api) return;
+    let fit = false;
+    try {
+      fit = sessionStorage.getItem("sketchify:fitOnLoad") === "1";
+    } catch {
+      fit = false;
+    }
+    if (!fit) return;
+    try {
+      sessionStorage.removeItem("sketchify:fitOnLoad");
+    } catch {
+      return;
+    }
+    const timer = setTimeout(() => {
+      const els = api.getSceneElements();
+      if (els.length > 0) api.scrollToContent(els, { fitToContent: true });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [api]);
+
   const startShare = useCallback(() => {
     setDialogScene(null);
     if (!api) {

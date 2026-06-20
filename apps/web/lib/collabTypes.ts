@@ -44,5 +44,6 @@ export type ServerMessage =
     }
   | { type: "permission"; canDraw: boolean }
   | { type: "kicked" }
+  | { type: "host-left" }
   | { type: "room-ended" }
   | { type: "error"; message: string };
